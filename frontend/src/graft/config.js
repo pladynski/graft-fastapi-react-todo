@@ -1,24 +1,32 @@
-import { GraftConfig, TodoService } from "@graft/pypi-todo-service";
+import { GraftConfig, TodoController } from "@graft/pypi-todo";
 
 GraftConfig.host = import.meta.env.VITE_GRAFT_HOST ?? "ws://localhost:8000/ws";
 GraftConfig.stateless = true;
 
-export { GraftConfig, TodoService };
+export { GraftConfig, TodoController };
 
-export function parseTodo(snapshot) {
+function readField(obj, getterName, fieldName) {
+  if (obj == null) return undefined;
+  const getter = obj[getterName];
+  if (typeof getter === "function") {
+    const value = getter.call(obj);
+    if (value != null && typeof value.getValue === "function") {
+      return value.getValue();
+    }
+    return value;
+  }
+  return obj[fieldName];
+}
+
+export function toTodo(todo) {
   return {
-    id: snapshot[0],
-    title: snapshot[1],
-    description: snapshot[2],
-    completed: snapshot[3] === "true",
+    id: readField(todo, "getId", "id"),
+    title: readField(todo, "getTitle", "title"),
+    description: readField(todo, "getDescription", "description"),
+    completed: Boolean(readField(todo, "getCompleted", "completed")),
   };
 }
 
-export function parseTodoList(flat) {
-  const todos = [];
-  const values = flat || [];
-  for (let i = 0; i < values.length; i += 4) {
-    todos.push(parseTodo(values.slice(i, i + 4)));
-  }
-  return todos;
+export function toTodoList(todos) {
+  return (todos || []).map(toTodo);
 }

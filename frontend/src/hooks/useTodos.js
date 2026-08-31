@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@chakra-ui/react";
-import { TodoService, parseTodo, parseTodoList } from "../graft/config.js";
+import { TodoController, toTodo, toTodoList } from "../graft/config.js";
 
 const createStyledToast =
   (toast) =>
@@ -31,11 +31,11 @@ const useTodos = () => {
 
   const todosQuery = useQuery({
     queryKey: ["todos"],
-    queryFn: async () => parseTodoList(await TodoService.listTodos()),
+    queryFn: async () => toTodoList(await TodoController.getAllTodos()),
   });
 
   const createTodoMutation = useMutation({
-    mutationFn: ({ title, description }) => TodoService.createTodo(title, description ?? ""),
+    mutationFn: ({ title, description }) => TodoController.createTodo(title, description ?? ""),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       styledToast({
@@ -56,7 +56,7 @@ const useTodos = () => {
 
   const updateTodoMutation = useMutation({
     mutationFn: ({ id, updates }) =>
-      TodoService.updateTodo(id, updates.title, updates.description ?? ""),
+      TodoController.updateTodo(id, updates.title, updates.description ?? ""),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
@@ -70,10 +70,10 @@ const useTodos = () => {
   });
 
   const toggleCompletionMutation = useMutation({
-    mutationFn: (id) => TodoService.toggleTodo(id),
-    onSuccess: (snapshot) => {
+    mutationFn: (id) => TodoController.toggleTodoCompletion(id),
+    onSuccess: (todo) => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
-      const data = parseTodo(snapshot);
+      const data = toTodo(todo);
       styledToast({
         title: data.completed ? "Todo completed" : "Todo uncompleted",
         description: `"${data.title}" marked as ${data.completed ? "completed" : "incomplete"}`,
@@ -91,7 +91,7 @@ const useTodos = () => {
   });
 
   const deleteTodoMutation = useMutation({
-    mutationFn: (id) => TodoService.deleteTodo(id),
+    mutationFn: (id) => TodoController.deleteTodo(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       styledToast({

@@ -20,9 +20,9 @@ def docker_down(ctx):
 
 @task
 def test_api(ctx):
-    """Run backend TodoService unit tests"""
+    """Run backend TodoController unit tests"""
     with ctx.cd("backend"):
-        ctx.run("python3 -m pytest test_todo_service.py -v")
+        ctx.run("python3 -m pytest test_todo_controller.py -v", env={"APP_ENV": "test"})
 
 
 @task

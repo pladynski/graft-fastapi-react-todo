@@ -1,6 +1,8 @@
 # Todo List App (Graftcode)
 
-A React + Vite frontend that calls a Python todo module through a Graft. The public Python methods are the contract. Graftcode Gateway (`gg`) hosts the module in Docker — there is no FastAPI / REST / OpenAPI surface.
+This is the original FastAPI + React todo app after a **migration by deletion**. We did not rewrite the backend.
+
+We deleted REST: FastAPI `main.py` routes, OpenAPI, `HTTPException` translation, and the JavaScript HTTP client. The existing `TodoController` methods are now the graft contract. Business logic in `services.py` is unchanged — the controller still calls `TodoService` the same way it did when those methods were HTTP handlers. `gg` hosts the controller; that is the only public API.
 
 ## Quick start (Docker)
 
@@ -44,22 +46,24 @@ Do not hand-write `fetch` / axios clients. After a Gateway restart without a pro
 
 ## Public contract
 
-`backend/todoservice/todo_service.py` — `TodoService` static methods:
+`backend/controllers.py` — `TodoController` static methods, same names as the old HTTP controller:
 
-- `list_todos() -> list[str]` — flat snapshots: `id, title, description, completed` repeated
-- `get_todo(todo_id: str) -> list[str]` — `[id, title, description, completed]`
-- `create_todo(title: str, description: str) -> list[str]`
-- `update_todo(todo_id: str, title: str, description: str) -> list[str]`
-- `toggle_todo(todo_id: str) -> list[str]`
-- `delete_todo(todo_id: str) -> bool`
+- `get_all_todos() -> list[TodoResponse]`
+- `get_todo(todo_id: int) -> TodoResponse`
+- `create_todo(title: str, description: str) -> TodoResponse`
+- `update_todo(todo_id: int, title: str, description: str) -> TodoResponse`
+- `toggle_todo_completion(todo_id: int) -> TodoResponse`
+- `delete_todo(todo_id: int) -> str`
 
-Ids are strings. `completed` is `"true"` or `"false"`. Collections are plain string arrays so every consumer language gets primitives (not opaque remote objects).
+`create_todo` / `update_todo` take primitive fields instead of FastAPI body models. `delete_todo` returns the service message string (`dict` is not a portable graft type). `TodoNotFoundException` is no longer mapped to HTTP 404 — the message propagates as a plain exception.
+
+Layers that stayed: `services.py` (`TodoService`), `repositories.py`, `models.py`, `schemas.py`.
 
 ## Tests
 
 ```bash
-# backend unit tests (call TodoService directly, isolated sqlite files)
-cd backend && python3 -m pytest test_todo_service.py -v
+# backend unit tests (call TodoController, which delegates to TodoService)
+cd backend && APP_ENV=test python3 -m pytest test_todo_controller.py -v
 
 # consumer smoke against a running Gateway (create + list + toggle + delete)
 cd frontend && npm run smoke
@@ -71,9 +75,13 @@ cd e2e && python3 -m pytest test_todo_e2e.py -v
 ## Project layout
 
 ```
-backend/todoservice/     # the only module passed to gg --modules
-backend/Dockerfile       # installs gg.deb (arch-detected) and runs gg
-frontend/src/graft/       # GraftConfig.host + TodoService imports
+backend/controllers.py  # graft facade; delegates to TodoService
+backend/services.py      # unchanged business logic
+backend/repositories.py
+backend/models.py
+backend/schemas.py
+backend/Dockerfile       # gg --modules ./controller/ (facade + schemas only)
+frontend/src/graft/       # GraftConfig.host + generated controller import
 frontend/scripts/         # install-graft.sh, smoke.mjs, clear-todos.mjs
 .cursor/rules/            # official Graftcode Cursor rules
 ```

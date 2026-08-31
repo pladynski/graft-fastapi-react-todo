@@ -4,7 +4,7 @@ This file provides guidance when working with code in this repository.
 
 ## Project Overview
 
-Full-stack todo app: React/Vite frontend + a plain Python Graftcode module hosted by Graftcode Gateway (`gg`) in Docker. Public methods on `TodoService` are the contract. Do not add FastAPI controllers, REST routes, or hand-written fetch clients.
+Full-stack todo app: React/Vite frontend + the original layered Python backend hosted by Graftcode Gateway (`gg`) in Docker. `TodoController` static methods are the public contract. They delegate to the existing `TodoService`. Do not add FastAPI routes, REST handlers, or hand-written fetch clients.
 
 ## Development Commands
 
@@ -20,7 +20,7 @@ Gateway listens on host port 8000 (WS + Vision `/npm` `/libraries`). Frontend is
 
 ```bash
 cd backend
-python3 -m pytest test_todo_service.py -v
+APP_ENV=test python3 -m pytest test_todo_controller.py -v
 ```
 
 ### Frontend (Gateway already running)
@@ -37,18 +37,19 @@ GUID on `/npm` rotates when Gateway restarts without a real `--projectKey`. Neve
 
 ## Architecture
 
-### Backend (Graftcode Python module)
+### Backend (existing layers + thin graft facade)
 
-- `backend/todoservice/todo_service.py`: public `TodoService` static methods
-- Persistence is sqlite3, kept off the public surface
-- Hosted with `gg --modules ./todoservice/ --port 8000 --corsAllowedOrigins *`
-- Ids are strings; todo snapshots are `list[str]` (`id, title, description, completed`)
+- `backend/controllers.py`: public `TodoController` static methods (no FastAPI / no `HTTPException`)
+- `backend/services.py`: original `TodoService` business logic — unchanged
+- `backend/repositories.py`, `models.py`, `schemas.py`: original data / schema layers
+- Hosted with `gg --modules ./controller/ --port 8000 --corsAllowedOrigins *`
+- `--modules` contains only the facade + `schemas.py` so GMA does not scan peewee models
 
 ### Frontend
 
-- Installs `@graft/pypi-todo-service` from the live Gateway `/npm` command
+- Installs the generated graft from the live Gateway `/npm` command
 - `frontend/src/graft/config.js` sets `GraftConfig.host` and `GraftConfig.stateless = true`
-- `useTodos` calls `TodoService` methods; no REST `ApiService`
+- `useTodos` calls `TodoController` methods; no REST `ApiService`
 
 ## Graftcode rules
 

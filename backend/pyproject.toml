@@ -1,3 +1,9 @@
+[project]
+name = "todo"
+version = "1.0.0"
+requires-python = ">=3.11"
+description = "Todo backend hosted by Graftcode Gateway"
+
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]
