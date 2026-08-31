@@ -1,25 +1,23 @@
-version: '3.8'
-
 services:
   backend:
     build: ./backend
     ports:
-      - '8000:8000'
+      - "8000:8000"
     volumes:
-      - ./backend:/app
-      - sqlite_data:/app/data
+      - sqlite_data:/usr/app/data
     environment:
-      - DATABASE_PATH=/app/data/counter.db
+      - DATABASE_PATH=/usr/app/data/todos.sqlite
 
   frontend:
     build: ./frontend
     ports:
-      - '5173:5173'
+      - "5173:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_GRAFT_HOST=ws://localhost:8000/ws
+      - GRAFT_NPM_URL=http://backend:8000/npm
     depends_on:
       - backend
 
