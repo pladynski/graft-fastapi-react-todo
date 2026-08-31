@@ -18,7 +18,7 @@ docker compose up --build
 | Install command | http://localhost:8000/npm | exact `npm install --registry …` |
 | Contract (UGM) | http://localhost:8000/libraries | machine-readable methods/types |
 
-Wait until `curl -sS http://localhost:8000/npm` returns HTTP 200. That body is the **current** graft install command. The registry GUID rotates on every Gateway restart unless you pass a real `--projectKey` from [portal.graftcode.com](https://portal.graftcode.com). Never invent a placeholder key — `gg` fails with `JwtToken decode failed`.
+Wait until `curl -sS http://localhost:8000/npm` returns HTTP 200. That body is the **current** graft install command. The registry GUID rotates on every Gateway restart unless you pass a real `--projectKey` from [portal.graftcode.com](https://portal.graftcode.com). Never invent a placeholder key — `gg` fails with `JwtToken decode failed`. The Gateway needs outbound HTTPS to `grft.dev` so it can publish that graft; compose uses the default Docker bridge for that.
 
 The frontend container entrypoint polls `/npm`, runs that exact install command, then starts Vite. In the browser the graft is configured with:
 

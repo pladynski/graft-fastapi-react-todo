@@ -3,15 +3,15 @@ from dataclasses import dataclass
 
 @dataclass
 class TodoResponse:
-    id: int
-    title: str
-    description: str
-    completed: bool
+    id: int = 0
+    title: str = ""
+    description: str = ""
+    completed: bool = False
 
 
 @dataclass
 class TodoCreate:
-    title: str
+    title: str = ""
     description: str = ""
 
 

@@ -23,3 +23,4 @@ const deleted = await TodoController.deleteTodo(created.id);
 console.log("deleted", deleted);
 console.log("remaining", (await TodoController.getAllTodos()).length);
 console.log("smoke ok");
+process.exit(0);

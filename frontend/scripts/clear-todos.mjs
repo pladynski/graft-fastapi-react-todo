@@ -11,3 +11,4 @@ for (const todo of todos) {
   cleared += 1;
 }
 console.log(`cleared ${cleared} todos`);
+process.exit(0);
