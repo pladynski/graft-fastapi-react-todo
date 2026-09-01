@@ -7,16 +7,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Host the existing controller with Graftcode Gateway (replaces uvicorn).
-# --modules is only the public surface so GMA does not scan peewee models.
+# slim has sh but not curl. Official installer unpacks ./gg into WORKDIR.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends wget ca-certificates \
- && ARCH=$(dpkg --print-architecture) \
- && wget -q -O /tmp/gg.deb "https://github.com/grft-dev/graftcode-gateway/releases/latest/download/gg_linux_${ARCH}.deb" \
- && dpkg -i /tmp/gg.deb \
- && rm /tmp/gg.deb \
- && apt-get clean \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
+ && curl -fsSL grft.dev/get/gg | sh \
  && mkdir -p /modules \
  && cp controllers.py schemas.py pyproject.toml /modules/
 
@@ -24,4 +19,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD ["gg", "--modules", "/modules/", "--runtime", "python", "--port", "8000", "--corsAllowedOrigins", "*"]
+CMD ["./gg", "--modules", "/modules/", "--runtime", "python", "--port", "8000", "--corsAllowedOrigins", "*"]

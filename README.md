@@ -6,7 +6,7 @@ This fork of [makevoid/vite-python-fastapi-todolist](https://github.com/makevoid
 
 ## Before → after
 
-1. **Delete FastAPI.** `backend/main.py` (routes, OpenAPI) is gone. `gg` hosts `TodoController`.
+1. **Delete FastAPI.** `backend/main.py` (routes, OpenAPI) is gone. The image runs `./gg` (installer unpacks the binary into WORKDIR) to host `TodoController`.
 2. **Strip HTTP from the controller.** Same methods (`get_all_todos`, `create_todo`, …) still call `TodoService`. No FastAPI, no `HTTPException`.
 3. **Dataclass the public schemas.** `TodoResponse` / `TodoCreate` / `TodoUpdate` stay in `schemas.py` — `BaseModel` → `@dataclass`.
 4. **Swap HTTP for a graft inside `TodoService.js`.** Same class, same methods (`fetchTodos`, `createTodo`, …). `ApiService.js` is gone. `useTodos` is unchanged.
