@@ -33,3 +33,13 @@ npm install
 npm run install:graft   # copies the command from /npm
 npm run dev
 ```
+
+AI assistant rules are not in this repo, so the migration diff stays small. Install them from the project root:
+
+```powershell
+iwr grft.dev/get | iex
+```
+
+```bash
+curl -fsSL grft.dev/get | sh
+```
