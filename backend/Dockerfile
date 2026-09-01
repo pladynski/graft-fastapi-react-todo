@@ -26,4 +26,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD ["./gg", "--modules", "/modules/", "--runtime", "python", "--port", "8000", "--corsAllowedOrigins", "*"]
+CMD ["./gg", "--modules", "/modules/", "--runtime", "python", "--port", "8000", "--corsConfig", "./cors.config"]
