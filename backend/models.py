@@ -12,3 +12,7 @@ class Todo(Model):
 
     class Meta:
         database = db
+
+if db.is_closed():
+    db.connect()
+db.create_tables([Todo], safe=True)

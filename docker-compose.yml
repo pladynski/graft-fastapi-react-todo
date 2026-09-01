@@ -1,23 +1,23 @@
+version: '3.8'
+
 services:
   backend:
     build: ./backend
-    # Default docker bridge has egress to grft.dev (needed to publish the graft).
-    # Compose-project networks in some environments have no outbound HTTPS.
     network_mode: bridge
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
-      - sqlite_data:/usr/app/data
+      - sqlite_data:/app/data
     environment:
-      - DATABASE_PATH=/usr/app/data/todos.sqlite
+      - DATABASE_PATH=/app/data/todos.sqlite
 
   frontend:
     build: ./frontend
     network_mode: bridge
-    ports:
-      - "5173:5173"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    ports:
+      - '5173:5173'
     volumes:
       - ./frontend:/app
       - /app/node_modules

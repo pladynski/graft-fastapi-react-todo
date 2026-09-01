@@ -45,5 +45,4 @@ else:  # Default to development
     APP_TITLE = "Todo API"
     RELOAD = True
 
-# Compose / runtime can override the sqlite file without changing APP_ENV.
 DATABASE_PATH = os.getenv("DATABASE_PATH", DATABASE_PATH)

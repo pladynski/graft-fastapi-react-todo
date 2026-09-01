@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@chakra-ui/react";
-import { TodoController, toTodo, toTodoList } from "../graft/config.js";
+import TodoService from "../services/TodoService.js";
 
+/**
+ * Custom toast function with enhanced styling
+ */
 const createStyledToast =
   (toast) =>
   ({ title, description, status, duration = 3000, isClosable = true }) => {
@@ -24,24 +27,32 @@ const createStyledToast =
     });
   };
 
+/**
+ * Custom hook for todo operations with React Query integration
+ */
 const useTodos = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
   const styledToast = createStyledToast(toast);
+  const todoService = new TodoService();
 
+  // Query for fetching all todos
   const todosQuery = useQuery({
     queryKey: ["todos"],
-    queryFn: async () => toTodoList(await TodoController.getAllTodos()),
+    queryFn: () => todoService.fetchTodos(),
   });
 
+  // Mutation for creating a todo
   const createTodoMutation = useMutation({
-    mutationFn: ({ title, description }) => TodoController.createTodo(title, description ?? ""),
+    mutationFn: ({ title, description }) => todoService.createTodo(title, description),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       styledToast({
         title: "Todo created",
         description: "Todo created successfully",
         status: "success",
+        duration: 3000,
+        isClosable: true,
       });
     },
     onError: (error) => {
@@ -50,13 +61,14 @@ const useTodos = () => {
         description: error.message,
         status: "error",
         duration: 5000,
+        isClosable: true,
       });
     },
   });
 
+  // Mutation for updating a todo
   const updateTodoMutation = useMutation({
-    mutationFn: ({ id, updates }) =>
-      TodoController.updateTodo(id, updates.title, updates.description ?? ""),
+    mutationFn: ({ id, updates }) => todoService.updateTodo(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
@@ -65,20 +77,23 @@ const useTodos = () => {
         title: "Error",
         description: error.message,
         status: "error",
+        duration: 3000,
+        isClosable: true,
       });
     },
   });
 
+  // Mutation for toggling todo completion
   const toggleCompletionMutation = useMutation({
-    mutationFn: (id) => TodoController.toggleTodoCompletion(id),
-    onSuccess: (todo) => {
+    mutationFn: (id) => todoService.toggleTodoCompletion(id),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
-      const data = toTodo(todo);
       styledToast({
         title: data.completed ? "Todo completed" : "Todo uncompleted",
         description: `"${data.title}" marked as ${data.completed ? "completed" : "incomplete"}`,
         status: "info",
         duration: 2000,
+        isClosable: true,
       });
     },
     onError: (error) => {
@@ -86,18 +101,23 @@ const useTodos = () => {
         title: "Error",
         description: error.message,
         status: "error",
+        duration: 3000,
+        isClosable: true,
       });
     },
   });
 
+  // Mutation for deleting a todo
   const deleteTodoMutation = useMutation({
-    mutationFn: (id) => TodoController.deleteTodo(id),
-    onSuccess: () => {
+    mutationFn: (id) => todoService.deleteTodo(id),
+    onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
       styledToast({
         title: "Todo deleted",
         description: "Todo deleted successfully",
         status: "info",
+        duration: 3000,
+        isClosable: true,
       });
     },
     onError: (error) => {
@@ -105,18 +125,25 @@ const useTodos = () => {
         title: "Error",
         description: error.message,
         status: "error",
+        duration: 3000,
+        isClosable: true,
       });
     },
   });
 
   return {
+    // Data
     todos: todosQuery.data || [],
     isLoading: todosQuery.isLoading,
     error: todosQuery.error,
+
+    // Mutations
     createTodo: createTodoMutation.mutate,
     updateTodo: updateTodoMutation.mutate,
     toggleTodoCompletion: toggleCompletionMutation.mutate,
     deleteTodo: deleteTodoMutation.mutate,
+
+    // Mutation states
     isCreating: createTodoMutation.isPending,
     isUpdating: updateTodoMutation.isPending,
     isToggling: toggleCompletionMutation.isPending,

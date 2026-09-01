@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from typing import Optional
 
 @dataclass
 class TodoResponse:
@@ -8,15 +8,17 @@ class TodoResponse:
     description: str = ""
     completed: bool = False
 
+    @classmethod
+    def model_validate(cls, todo, from_attributes=True):
+        return cls(id=todo.id, title=todo.title, description=todo.description, completed=todo.completed)
 
 @dataclass
 class TodoCreate:
     title: str = ""
-    description: str = ""
-
+    description: Optional[str] = ''
 
 @dataclass
 class TodoUpdate:
-    title: str | None = None
-    description: str | None = None
-    completed: bool | None = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
