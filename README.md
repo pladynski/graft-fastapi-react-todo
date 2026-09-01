@@ -38,6 +38,7 @@ curl -fsSL grft.dev/get | sh
 
 ```
 backend/
+├── main.py              # DB bootstrap / --initMethod (old FastAPI lifespan startup)
 ├── models.py            # Database models using Peewee ORM
 ├── schemas.py           # Dataclass models for request/response validation
 ├── services.py          # Business logic layer with service classes
@@ -179,9 +180,8 @@ todoService.toggleTodoCompletion(id)
 
 ### Key Development URLs
 - **Frontend**: http://localhost:5173
-- **Gateway / Vision**: http://localhost:8000
-- **Install command**: http://localhost:8000/npm
-- **Contract**: http://localhost:8000/libraries
+- **Backend API**: ws://localhost:8000/ws
+- **API Documentation**: http://localhost:8000 **(Graftcode Vision)**
 
 ---
 
