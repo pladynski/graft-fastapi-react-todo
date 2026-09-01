@@ -7,11 +7,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# slim has sh but not curl. Official installer unpacks ./gg into WORKDIR.
+# slim has sh but not curl. Official installer unpacks ./gg, except on Debian
+# it only writes gg.deb — extract that binary (do not dpkg -i).
 RUN apt-get update \
  && apt-get install -y --no-install-recommends curl ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
  && curl -fsSL grft.dev/get/gg | sh \
+ && if [ ! -x ./gg ] && [ -f ./gg.deb ]; then \
+      dpkg-deb -x ./gg.deb /tmp/gg-unpack \
+      && find /tmp/gg-unpack -type f -name gg -exec cp {} ./gg \; \
+      && chmod +x ./gg \
+      && rm -rf /tmp/gg-unpack ./gg.deb; \
+    fi \
  && mkdir -p /modules \
  && cp controllers.py schemas.py pyproject.toml /modules/
 
