@@ -17,31 +17,23 @@ TEST_PORT = 8001
 PRODUCTION_HOST = "0.0.0.0"
 PRODUCTION_PORT = 8000
 
-# CORS origins
-DEVELOPMENT_ORIGINS = ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"]
-TEST_ORIGINS = ["http://localhost:5175"]
-PRODUCTION_ORIGINS = []  # Should be configured for production
-
 # Environment-based configuration
 if APP_ENV == "test":
     DATABASE_PATH = TEST_DB_PATH
     SERVER_HOST = TEST_HOST
     SERVER_PORT = TEST_PORT
-    CORS_ORIGINS = TEST_ORIGINS
     APP_TITLE = "Todo API - Test"
     RELOAD = False
 elif APP_ENV == "production":
     DATABASE_PATH = PRODUCTION_DB_PATH
     SERVER_HOST = PRODUCTION_HOST
     SERVER_PORT = PRODUCTION_PORT
-    CORS_ORIGINS = PRODUCTION_ORIGINS
     APP_TITLE = "Todo API - Production"
     RELOAD = False
 else:  # Default to development
     DATABASE_PATH = DEVELOPMENT_DB_PATH
     SERVER_HOST = DEVELOPMENT_HOST
     SERVER_PORT = DEVELOPMENT_PORT
-    CORS_ORIGINS = DEVELOPMENT_ORIGINS
     APP_TITLE = "Todo API"
     RELOAD = True
 
