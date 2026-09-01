@@ -27,4 +27,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 # Shell form so DEVELOPMENT_ORIGINS expands at runtime (JSON exec form would not).
-CMD ./gg --modules /modules/ --runtime python --port 8000 --corsAllowedOrigins "${DEVELOPMENT_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:3000}" --initMethod Lifespan.startup
+CMD ./gg --modules /modules/ --runtime python --port 8000 --corsAllowedOrigins "${DEVELOPMENT_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:3000}" --initMethod main.Lifespan.startup
