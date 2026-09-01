@@ -20,11 +20,11 @@ RUN apt-get update \
       && rm -rf /tmp/gg-unpack ./gg.deb; \
     fi \
  && mkdir -p /modules \
- && cp controllers.py schemas.py pyproject.toml /modules/
+ && cp controllers.py schemas.py pyproject.toml main.py /modules/
 
 ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
 # Shell form so DEVELOPMENT_ORIGINS expands at runtime (JSON exec form would not).
-CMD ./gg --modules /modules/ --runtime python --port 8000 --corsAllowedOrigins "${DEVELOPMENT_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:3000}"
+CMD ./gg --modules /modules/ --runtime python --port 8000 --corsAllowedOrigins "${DEVELOPMENT_ORIGINS:-http://localhost:5173,http://localhost:5174,http://localhost:3000}" --initMethod Lifespan.startup
