@@ -1,3 +1,7 @@
+# Graftcode: business layer stayed. The migration is thin — FastAPI (the integration method) is gone, not this logic.
+# Remote methods are called like local ones. The same methods are MCP tools — copy the config from Graftcode Vision.
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 from typing import List
 from schemas import TodoResponse, TodoCreate, TodoUpdate
 from repositories import TodoRepository

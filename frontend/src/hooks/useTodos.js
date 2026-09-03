@@ -1,3 +1,7 @@
+// Graftcode: still uses TodoService — no HTTP in this hook. The graft swap is inside TodoService.js.
+// FastAPI (the integration method) is gone; remote methods are local. Same methods are MCP (copy config from Graftcode Vision).
+// https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@chakra-ui/react";
 import TodoService from "../services/TodoService.js";

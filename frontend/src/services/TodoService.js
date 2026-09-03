@@ -1,3 +1,7 @@
+// Graftcode: HTTP/ApiService gone. Same method names now call TodoController via a graft — like local functions.
+// FastAPI fully removed. Those methods are also MCP: copy the MCP config from Graftcode Vision.
+// https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 import { GraftConfig, TodoController, TodoCreate, TodoUpdate } from "@graft/pypi-todo";
 
 GraftConfig.host = import.meta.env.VITE_GRAFT_HOST ?? "ws://localhost:8000/ws";

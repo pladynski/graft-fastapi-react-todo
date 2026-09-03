@@ -1,3 +1,7 @@
+# Graftcode: data-access layer stayed (Peewee + TodoNotFoundException). FastAPI never lived here.
+# Integration method removed elsewhere — grafts call methods as if local. Same methods are MCP (Vision config).
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 from typing import List
 from models import Todo
 

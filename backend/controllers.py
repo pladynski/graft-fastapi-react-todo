@@ -1,3 +1,7 @@
+# Graftcode: FastAPI/HTTPException stripped. Public methods are the graft contract; still a thin facade over TodoService.
+# The integration method (FastAPI) is gone — remote methods are called like local ones. Same methods are MCP: copy the config from Graftcode Vision.
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 from typing import List
 
 from schemas import TodoResponse, TodoCreate, TodoUpdate

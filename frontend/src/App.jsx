@@ -1,3 +1,7 @@
+// Graftcode: UI unchanged — still talks to useTodos. FastAPI/REST is gone from the stack.
+// Remote methods are called like local ones. The same methods are MCP — copy the config from Graftcode Vision.
+// https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 import React, { useState } from "react";
 import { IoAdd, IoTrash, IoCreate, IoCheckmark, IoClose } from "react-icons/io5";
 import useTodos from "./hooks/useTodos.js";

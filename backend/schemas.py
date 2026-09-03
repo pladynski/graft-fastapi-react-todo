@@ -1,3 +1,7 @@
+# Graftcode: Pydantic BaseModel → @dataclass so these DTOs are portable graft types (services.py still uses model_validate).
+# FastAPI is fully removed; callers invoke the same methods like local code. Those methods are also MCP — copy the config from Graftcode Vision.
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 from dataclasses import dataclass
 from typing import Optional
 

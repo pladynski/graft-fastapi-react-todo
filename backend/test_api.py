@@ -1,3 +1,7 @@
+# Graftcode: HTTP TestClient dropped. These unit-test TodoController methods (the graft contract), not REST routes.
+# No FastAPI — remote methods are local. Same methods are MCP; copy the config from Graftcode Vision.
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 import pytest
 from models import Todo
 from controllers import TodoController
