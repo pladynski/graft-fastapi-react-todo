@@ -1,5 +1,5 @@
-# Graftcode: Peewee Todo model unchanged. Import-time DB init was removed; startup is main.Lifespan.startup (--initMethod).
-# FastAPI is gone — remote methods are local. Same methods are MCP; copy the config from Graftcode Vision.
+# Graftcode: Peewee Todo fields unchanged. Only removed import-time connect/create_tables (now Lifespan.startup).
+# Benefit: the model stayed; we did not invent a new persistence shape.
 # https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 from peewee import *

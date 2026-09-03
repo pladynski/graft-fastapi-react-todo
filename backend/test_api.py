@@ -1,5 +1,5 @@
-# Graftcode: HTTP TestClient dropped. These unit-test TodoController methods (the graft contract), not REST routes.
-# No FastAPI — remote methods are local. Same methods are MCP; copy the config from Graftcode Vision.
+# Graftcode: TestClient, URLs, and status-code asserts replaced with TodoController.method(...) calls.
+# Benefit: ordinary unit tests — no HTTP client, no 404/200 mapping.
 # https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 import pytest

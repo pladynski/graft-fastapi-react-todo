@@ -1,5 +1,5 @@
-// Graftcode: React + Chakra + React Query bootstrap unchanged. No REST client to wire up.
-// FastAPI is gone; methods are local grafts and MCP — copy the MCP config from Graftcode Vision.
+// Graftcode: still ChakraProvider + QueryClientProvider + <App />. No graft or HTTP setup in this file.
+// Benefit: entry wiring stayed; transport changed below it.
 // https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 import React from "react";

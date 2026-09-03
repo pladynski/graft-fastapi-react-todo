@@ -1,5 +1,5 @@
-# Graftcode: CORS origin lists removed (compose DEVELOPMENT_ORIGINS → gg --corsAllowedOrigins). DB/host settings stayed.
-# FastAPI is fully removed; remote methods are called like local ones. Same methods are MCP — copy the config from Graftcode Vision.
+# Graftcode: DEVELOPMENT_ORIGINS / CORS_ORIGINS lists deleted. Origins now live on compose env for gg --corsAllowedOrigins.
+# Benefit: this file is no longer FastAPI CORSMiddleware settings.
 # https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 import os

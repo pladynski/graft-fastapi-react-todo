@@ -1,5 +1,5 @@
-# Graftcode: FastAPI app/routes gone. Lifespan.startup is gg --initMethod (the old lifespan DB bootstrap: connect + create_tables).
-# No integration method — remote methods are local calls. Same methods are MCP; copy the config from Graftcode Vision.
+# Graftcode: FastAPI app, routes, and CORSMiddleware deleted. Lifespan.startup is gg --initMethod (connect sqlite + create_tables).
+# Benefit: process startup without standing up a REST app.
 # https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 from models import db, Todo

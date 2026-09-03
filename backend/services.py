@@ -1,5 +1,5 @@
-# Graftcode: business layer stayed. The migration is thin — FastAPI (the integration method) is gone, not this logic.
-# Remote methods are called like local ones. The same methods are MCP tools — copy the config from Graftcode Vision.
+# Graftcode: TodoService is untouched — create/update/toggle logic did not move.
+# Benefit: the domain stayed put; the migration did not rewrite business rules.
 # https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 from typing import List

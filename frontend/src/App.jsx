@@ -1,5 +1,5 @@
-// Graftcode: UI unchanged — still talks to useTodos. FastAPI/REST is gone from the stack.
-// Remote methods are called like local ones. The same methods are MCP — copy the config from Graftcode Vision.
+// Graftcode: App still imports useTodos and renders the same cards/forms. No API URLs or fetch here.
+// Benefit: the screen did not move when the stack dropped REST.
 // https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
 
 import React, { useState } from "react";
