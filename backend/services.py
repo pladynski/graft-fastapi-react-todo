@@ -1,7 +1,3 @@
-# Graftcode: TodoService is untouched — create/update/toggle logic did not move.
-# Benefit: the domain stayed put; the migration did not rewrite business rules.
-# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
-
 from typing import List
 from schemas import TodoResponse, TodoCreate, TodoUpdate
 from repositories import TodoRepository

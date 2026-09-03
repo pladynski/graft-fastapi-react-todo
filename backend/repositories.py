@@ -1,7 +1,3 @@
-# Graftcode: TodoRepository and TodoNotFoundException are the original Peewee access layer.
-# Benefit: data access was not rewritten for Graftcode.
-# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
-
 from typing import List
 from models import Todo
 
