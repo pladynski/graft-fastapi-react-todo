@@ -29,7 +29,7 @@ This is a **real migration**, not a rewrite. `TodoService`, the repository, and 
 
 - **Delete:** FastAPI routes / CORS app, `ApiService.js`, HTTPException → status maps, TestClient URL asserts
 - **Keep:** the same public methods and DTOs
-- **Gain:** less code, transport decoupled, remote calls look local, MCP from Graftcode Vision, diffs AI can actually read
+- **Gain:** less code, transport decoupled, remote calls look local, same public methods are MCP-ready for any LLM (copy the MCP config from the Graftcode Vision portal), diffs AI can actually read
 
 **Integration / transport plumbing** (this demo: `main.py`, `ApiService.js`, HTTP `TodoService.js`, FastAPI lines in `controllers.py`, HTTP asserts in `test_api.py`):
 
