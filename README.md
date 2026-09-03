@@ -23,6 +23,30 @@ iwr grft.dev/get | iex
 curl -fsSL grft.dev/get | sh
 ```
 
+## Why Graftcode (instead of FastAPI / REST)
+
+This is a **real migration**, not a rewrite. `TodoService`, the repository, and Peewee models stayed. We deleted the integration method.
+
+| | |
+|---|---|
+| **Delete** | FastAPI routes / CORS app, `ApiService.js`, HTTPException → status maps, TestClient URL asserts |
+| **Keep** | The same public methods and DTOs |
+| **Gain** | Less code, transport decoupled, remote calls look local, MCP from Graftcode Vision, diffs AI can actually read |
+
+**Integration / transport plumbing** (this demo: `main.py`, `ApiService.js`, HTTP `TodoService.js`, FastAPI lines in `controllers.py`, HTTP asserts in `test_api.py`):
+
+- **Before:** ~290 lines
+- **After:** ~95 lines
+- **Removed:** ~195 lines → **≈67% less** integration code
+
+File sizes that drive that: `main.py` 85 → 20, `ApiService.js` 84 → 0 (deleted), `test_api.py` 227 → 179 (HTTP asserts ~48 → ~0). The PR as a whole is **+275 / −398** (net deletions).
+
+**AI-assisted workflows:** fewer integration lines in context → higher context efficiency. Future AI PRs touch business methods, not HTTP glue — cleaner diffs, lower token use, because models aren’t rewriting controllers, clients, or status maps.
+
+https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
+Try it: `docker compose up --build` — app on :5173, Graftcode Vision on :8000.
+
 ### Quick Start TLDR
 
 - 1 - Clone the repo
