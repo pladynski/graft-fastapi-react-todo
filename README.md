@@ -7,11 +7,43 @@
 
 **A full-stack todo list app repo template to kickstart any of your projects**
 
-*Built with FastAPI + React Vite, JSX + Comprehensive Integration Testing*
+*Built with Graftcode + React Vite, JSX + Comprehensive Integration Testing*
 
 Iterate from a todo list to any app. Use this repo as a base.
 
 </div>
+
+This project was changed from the standard legacy FastAPI approach, which binds code to an integration method (REST), to grafting: you call remote methods as if they were local. To keep developing it with AI, install the Graftcode skill from the project root:
+
+```powershell
+iwr grft.dev/get | iex
+```
+
+```bash
+curl -fsSL grft.dev/get | sh
+```
+
+## Why Graftcode (instead of FastAPI / REST)
+
+This is a **real migration**, not a rewrite. `TodoService`, the repository, and Peewee models stayed. We deleted the integration method.
+
+- **Delete:** FastAPI routes / CORS app, `ApiService.js`, HTTPException → status maps, TestClient URL asserts
+- **Keep:** the same public methods and DTOs
+- **Gain:** less code, transport decoupled, remote calls look local, same public methods are MCP-ready for any LLM (copy the MCP config from the Graftcode Vision portal), diffs AI can actually read
+
+**Integration / transport plumbing** (this demo: `main.py`, `ApiService.js`, HTTP `TodoService.js`, FastAPI lines in `controllers.py`, HTTP asserts in `test_api.py`):
+
+- **Before:** ~290 lines
+- **After:** ~95 lines
+- **Removed:** ~195 lines → **≈67% less** integration code
+
+File sizes that drive that: `main.py` 85 → 20, `ApiService.js` 84 → 0 (deleted), `test_api.py` 227 → 179 (HTTP asserts ~48 → ~0). The PR as a whole is **+275 / −398** (net deletions).
+
+**AI-assisted workflows:** fewer integration lines in context → higher context efficiency. Future AI PRs touch business methods, not HTTP glue — cleaner diffs, lower token use, because models aren’t rewriting controllers, clients, or status maps.
+
+https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
+Try it: `docker compose up --build` — app on :5173, Graftcode Vision on :8000.
 
 ### Quick Start TLDR
 
@@ -24,17 +56,16 @@ Iterate from a todo list to any app. Use this repo as a base.
 
 ## 🏗️ Project Structure
 
-### Backend Architecture (Python/FastAPI)
+### Backend Architecture (Python/Graftcode)
 
 ```
 backend/
-├── main.py              # FastAPI application setup and route definitions
+├── main.py              # DB bootstrap / --initMethod (old FastAPI lifespan startup)
 ├── models.py            # Database models using Peewee ORM
-├── schemas.py           # Pydantic models for request/response validation
+├── schemas.py           # Dataclass models for request/response validation
 ├── services.py          # Business logic layer with service classes
-├── controllers.py       # HTTP request/response handling layer
+├── controllers.py       # Graftcode public surface (delegates to TodoService)
 ├── repositories.py      # Data access layer with repository pattern
-├── test_api.py         # Unit and integration tests
 └── requirements.txt     # Python dependencies
 ```
 
@@ -42,7 +73,7 @@ backend/
 
 - **Service Layer**: `TodoService` handles all business logic operations
 - **Repository Pattern**: `TodoRepository` manages data access and response model conversion
-- **Controller Layer**: `TodoController` handles HTTP concerns and error translation
+- **Controller Layer**: `TodoController` public methods are the graft contract
 - **Custom Exceptions**: Domain-specific exceptions for better error handling
 - **Dependency Injection**: Clean separation of concerns with minimal coupling
 
@@ -54,8 +85,7 @@ frontend/
 │   ├── App.jsx                    # Main application component
 │   ├── main.jsx                   # Application entry point with providers
 │   ├── services/
-│   │   ├── ApiService.js          # Base HTTP client class
-│   │   └── TodoService.js         # Todo-specific API operations
+│   │   └── TodoService.js         # Todo operations via a graft (not HTTP)
 │   ├── hooks/
 │   │   └── useTodos.js            # Custom hook for todo operations
 │   └── index.css                  # Global styles
@@ -101,21 +131,25 @@ npm install
 
 ### 2. Development Mode
 ```bash
-# Terminal 1: Backend (Port 8000) 🚀
-cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# Gateway (:8000) + frontend (:5173)
+docker compose up --build
+# wait until http://localhost:8000/npm is 200
+```
+
+Or locally, with the Gateway already running:
+
+```bash
+# Terminal 1: Gateway (Port 8000) 🚀
+docker compose up --build backend
 
 # Terminal 2: Frontend (Port 5173) ⚡
 cd frontend
+npm run install:graft    # exact command from http://localhost:8000/npm
 npm run dev
 ```
 
 ### 3. Run Tests 🧪
 ```bash
-# 🔬 Backend unit tests (12 tests, 0.45s)
-cd backend
-pytest test_api.py -v
-
 # 🌐 End-to-end tests (13 tests, 10.4s)
 cd e2e && python3 -m pytest test_todo_e2e.py -v
 
@@ -127,54 +161,49 @@ python3 -m pytest test_todo_e2e.py::TestTodoAppE2E::test_app_title -v
 
 ### 🎉 **That's it! Your todo app is live!**
 
-**Frontend**: http://localhost:5173 | **API**: http://localhost:8000 | **Docs**: http://localhost:8000/docs
+**Frontend**: http://localhost:5173 | **Gateway**: http://localhost:8000 | **Install command**: http://localhost:8000/npm
 
 </div>
 
 ## 📡 API Reference
 
-All API endpoints are prefixed with `/api/todos`
+`TodoController` methods (hosted by `./gg`) are the contract — not REST routes.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | Get all todos |
-| `POST` | `/` | Create new todo |
-| `GET` | `/{id}` | Get specific todo |
-| `PUT` | `/{id}` | Update todo |
-| `POST` | `/{id}/toggle` | Toggle todo completion |
-| `DELETE` | `/{id}` | Delete todo |
+| Method | Description |
+|--------|-------------|
+| `get_all_todos()` | Get all todos |
+| `create_todo(todo)` | Create new todo |
+| `get_todo(todo_id)` | Get specific todo |
+| `update_todo(todo_id, update)` | Update todo |
+| `toggle_todo_completion(todo_id)` | Toggle todo completion |
+| `delete_todo(todo_id)` | Delete todo |
 
-### Example Requests
+Frontend `TodoService.js` calls these via a graft (`npm run install:graft` copies the command from `http://localhost:8000/npm`).
+
+### Example
 
 **Create Todo**
-```bash
-POST /api/todos
-Content-Type: application/json
-
-{
-  "title": "Learn FastAPI",
-  "description": "Build a todo app with Python and React"
-}
+```js
+todoService.createTodo("Learn Graftcode", "Build a todo app with Python and React")
 ```
 
 **Toggle Todo Completion**
-```bash
-POST /api/todos/1/toggle
+```js
+todoService.toggleTodoCompletion(id)
 ```
 
 ## 🔧 Development Workflow
 
 ### Day-to-Day Development
-1. **Start Services**: Backend (port 8000) + Frontend (port 5173)
-2. **Interactive API Docs**: Visit http://localhost:8000/docs for Swagger UI
-3. **Hot Reload**: Both services support hot reload for rapid development
-4. **Testing**: Run unit tests first, then E2E tests for integration validation
+1. **Start Services**: Gateway (port 8000) + Frontend (port 5173). Wait until `/npm` is 200.
+2. **Graft install command**: http://localhost:8000/npm (copy that exact `npm install`)
+3. **Hot Reload**: Frontend Vite supports hot reload for rapid development
+4. **Testing**: Run E2E tests for integration validation
 
 ### Key Development URLs
 - **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **Alternative API docs**: http://localhost:8000/redoc
+- **Backend API**: ws://localhost:8000/ws
+- **API Documentation**: http://localhost:8000 **(Graftcode Vision)**
 
 ---
 

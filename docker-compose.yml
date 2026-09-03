@@ -3,23 +3,28 @@ version: '3.8'
 services:
   backend:
     build: ./backend
+    network_mode: bridge
     ports:
       - '8000:8000'
     volumes:
-      - ./backend:/app
       - sqlite_data:/app/data
     environment:
-      - DATABASE_PATH=/app/data/counter.db
+      - DATABASE_PATH=/app/data/todos.sqlite
+      - DEVELOPMENT_ORIGINS=http://localhost:5173,http://localhost:5174,http://localhost:3000
 
   frontend:
     build: ./frontend
+    network_mode: bridge
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - '5173:5173'
     volumes:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_GRAFT_HOST=ws://localhost:8000/ws
+      - GRAFT_NPM_URL=http://host.docker.internal:8000/npm
     depends_on:
       - backend
 

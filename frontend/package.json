@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "install:graft": "bash scripts/install-graft.sh",
     "build": "vite build",
     "preview": "vite preview",
     "test:e2e": "playwright test",

@@ -1,8 +1,12 @@
+# Graftcode: TestClient, URLs, and status-code asserts replaced with TodoController.method(...) calls.
+# Benefit: ordinary unit tests — no HTTP client, no 404/200 mapping.
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 import pytest
-from fastapi.testclient import TestClient
-from peewee import SqliteDatabase
-from main import app
 from models import Todo
+from controllers import TodoController
+from schemas import TodoCreate, TodoUpdate
+from repositories import TodoNotFoundException
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -25,13 +29,6 @@ def test_db():
 
 
 @pytest.fixture
-def client(test_db):
-    """Create a test client using the main app"""
-    with TestClient(app) as test_client:
-        yield test_client
-
-
-@pytest.fixture
 def setup_todos():
     """Setup initial test todos using Peewee directly"""
     Todo.create(title="Buy groceries", description="Milk, bread, eggs", completed=False)
@@ -42,185 +39,140 @@ def setup_todos():
     ]
 
 
-def test_read_root(client):
-    """Test root endpoint"""
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Todo API", "version": "1.0.0"}
-
-
-def test_get_all_todos_empty(client):
+def test_get_all_todos_empty():
     """Test getting all todos when none exist"""
-    response = client.get("/api/todos")
-    assert response.status_code == 200
-    assert response.json() == []
+    todos = TodoController.get_all_todos()
+    assert todos == []
 
 
-def test_create_todo(client):
+def test_create_todo():
     """Test creating a new todo"""
-    response = client.post(
-        "/api/todos",
-        json={"title": "Learn FastAPI", "description": "Build a todo app"}
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "Learn FastAPI"
-    assert data["description"] == "Build a todo app"
-    assert data["completed"] == False
+    data = TodoController.create_todo(TodoCreate(title="Learn FastAPI", description="Build a todo app"))
+    assert data.title == "Learn FastAPI"
+    assert data.description == "Build a todo app"
+    assert data.completed == False
 
 
-def test_get_all_todos(client, setup_todos):
+def test_get_all_todos(setup_todos):
     """Test getting all todos"""
-    response = client.get("/api/todos")
-    assert response.status_code == 200
-    data = response.json()
+    data = TodoController.get_all_todos()
     assert len(data) == 2
 
     # Verify todo titles
-    todo_titles = [t["title"] for t in data]
+    todo_titles = [t.title for t in data]
     assert "Buy groceries" in todo_titles
     assert "Write tests" in todo_titles
 
 
-def test_get_todo(client, setup_todos):
+def test_get_todo(setup_todos):
     """Test getting a specific todo"""
     # First create a todo to get its ID
     todo = Todo.create(title="Test todo", description="For testing", completed=False)
     
-    response = client.get(f"/api/todos/{todo.id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "Test todo"
-    assert data["description"] == "For testing"
-    assert data["completed"] == False
+    data = TodoController.get_todo(todo.id)
+    assert data.title == "Test todo"
+    assert data.description == "For testing"
+    assert data.completed == False
 
 
-def test_update_todo(client, setup_todos):
+def test_update_todo(setup_todos):
     """Test updating a todo"""
     # First create a todo to update
     todo = Todo.create(title="Original title", description="Original desc", completed=False)
     
-    response = client.put(
-        f"/api/todos/{todo.id}",
-        json={"title": "Updated title", "description": "Updated desc", "completed": True}
+    data = TodoController.update_todo(
+        todo.id,
+        TodoUpdate(title="Updated title", description="Updated desc", completed=True),
     )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "Updated title"
-    assert data["description"] == "Updated desc"
-    assert data["completed"] == True
+    assert data.title == "Updated title"
+    assert data.description == "Updated desc"
+    assert data.completed == True
 
 
-def test_partial_update_todo(client):
+def test_partial_update_todo():
     """Test partial updating a todo"""
     # Create a todo first
     todo = Todo.create(title="Original title", description="Original desc", completed=False)
     
     # Update only the completed status
-    response = client.put(
-        f"/api/todos/{todo.id}",
-        json={"completed": True}
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "Original title"  # Should remain unchanged
-    assert data["description"] == "Original desc"  # Should remain unchanged
-    assert data["completed"] == True  # Should be updated
+    data = TodoController.update_todo(todo.id, TodoUpdate(completed=True))
+    assert data.title == "Original title"  # Should remain unchanged
+    assert data.description == "Original desc"  # Should remain unchanged
+    assert data.completed == True  # Should be updated
 
 
-def test_toggle_todo_completion(client):
+def test_toggle_todo_completion():
     """Test toggling a todo's completion status"""
     # Create a todo first
     todo = Todo.create(title="Toggle test", description="Test toggle", completed=False)
     
     # Toggle to completed
-    response = client.post(f"/api/todos/{todo.id}/toggle")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["completed"] == True
+    data = TodoController.toggle_todo_completion(todo.id)
+    assert data.completed == True
     
     # Toggle back to not completed
-    response = client.post(f"/api/todos/{todo.id}/toggle")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["completed"] == False
+    data = TodoController.toggle_todo_completion(todo.id)
+    assert data.completed == False
 
 
-def test_delete_todo(client, setup_todos):
+def test_delete_todo(setup_todos):
     """Test deleting a todo"""
     # Create a todo to delete
     todo = Todo.create(title="To be deleted", description="Will be removed", completed=False)
     
-    response = client.delete(f"/api/todos/{todo.id}")
-    assert response.status_code == 200
-    assert "deleted" in response.json()["message"]
+    message = TodoController.delete_todo(todo.id)
+    assert "deleted" in message
 
     # Verify todo is deleted
-    response = client.get(f"/api/todos/{todo.id}")
-    assert response.status_code == 404
+    with pytest.raises(TodoNotFoundException):
+        TodoController.get_todo(todo.id)
 
 
-def test_todo_not_found(client):
+def test_todo_not_found():
     """Test operations on non-existent todo"""
-    response = client.get("/api/todos/999")
-    assert response.status_code == 404
+    with pytest.raises(TodoNotFoundException):
+        TodoController.get_todo(999)
 
-    response = client.put("/api/todos/999", json={"title": "Updated"})
-    assert response.status_code == 404
+    with pytest.raises(TodoNotFoundException):
+        TodoController.update_todo(999, TodoUpdate(title="Updated"))
 
-    response = client.post("/api/todos/999/toggle")
-    assert response.status_code == 404
+    with pytest.raises(TodoNotFoundException):
+        TodoController.toggle_todo_completion(999)
 
-    response = client.delete("/api/todos/999")
-    assert response.status_code == 404
+    with pytest.raises(TodoNotFoundException):
+        TodoController.delete_todo(999)
 
 
-def test_create_todo_minimal(client):
+def test_create_todo_minimal():
     """Test creating a todo with minimal data"""
-    response = client.post(
-        "/api/todos",
-        json={"title": "Minimal todo"}
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert data["title"] == "Minimal todo"
-    assert data["description"] == ""  # Should default to empty string
-    assert data["completed"] == False  # Should default to False
+    data = TodoController.create_todo(TodoCreate(title="Minimal todo"))
+    assert data.title == "Minimal todo"
+    assert data.description == ""  # Should default to empty string
+    assert data.completed == False  # Should default to False
 
 
-def test_complex_workflow(client):
+def test_complex_workflow():
     """Test a complex workflow with multiple operations"""
     # Create todo
-    response = client.post(
-        "/api/todos",
-        json={"title": "Workflow todo", "description": "Testing workflow"}
-    )
-    assert response.status_code == 200
-    todo_id = response.json()["id"]
+    created = TodoController.create_todo(TodoCreate(title="Workflow todo", description="Testing workflow"))
+    todo_id = created.id
 
     # Update description
-    response = client.put(
-        f"/api/todos/{todo_id}",
-        json={"description": "Updated description"}
-    )
-    assert response.json()["description"] == "Updated description"
-    assert response.json()["title"] == "Workflow todo"  # Should remain unchanged
+    data = TodoController.update_todo(todo_id, TodoUpdate(description="Updated description"))
+    assert data.description == "Updated description"
+    assert data.title == "Workflow todo"  # Should remain unchanged
 
     # Toggle completion
-    response = client.post(f"/api/todos/{todo_id}/toggle")
-    assert response.json()["completed"] == True
+    data = TodoController.toggle_todo_completion(todo_id)
+    assert data.completed == True
 
     # Update title while keeping completion status
-    response = client.put(
-        f"/api/todos/{todo_id}",
-        json={"title": "Final title"}
-    )
-    assert response.json()["title"] == "Final title"
-    assert response.json()["completed"] == True  # Should remain True
+    data = TodoController.update_todo(todo_id, TodoUpdate(title="Final title"))
+    assert data.title == "Final title"
+    assert data.completed == True  # Should remain True
 
     # Delete
-    response = client.delete(f"/api/todos/{todo_id}")
-    assert response.status_code == 200
+    TodoController.delete_todo(todo_id)
 
 
 if __name__ == "__main__":

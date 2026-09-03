@@ -1,49 +1,44 @@
-from fastapi import HTTPException
+# Graftcode: stripped FastAPI and HTTPException. Same method names stay a thin facade over TodoService — that is the graft contract.
+# Benefit: no HTTP plumbing in this file; this surface is MCP-ready (copy the MCP config from Graftcode Vision).
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
 from typing import List
 
 from schemas import TodoResponse, TodoCreate, TodoUpdate
 from services import TodoService
-from repositories import TodoNotFoundException
+
+_service = TodoService()
 
 
 class TodoController:
     """Controller class for todo API endpoints"""
 
-    def __init__(self):
-        self.service = TodoService()
-
-    def get_all_todos(self) -> List[TodoResponse]:
+    @staticmethod
+    def get_all_todos() -> List[TodoResponse]:
         """Get all todos"""
-        return self.service.get_all_todos()
+        return _service.get_all_todos()
 
-    def get_todo(self, todo_id: int) -> TodoResponse:
+    @staticmethod
+    def get_todo(todo_id: int) -> TodoResponse:
         """Get a specific todo by ID"""
-        try:
-            return self.service.get_todo_by_id(todo_id)
-        except TodoNotFoundException as e:
-            raise HTTPException(status_code=404, detail=str(e))
+        return _service.get_todo_by_id(todo_id)
 
-    def create_todo(self, todo: TodoCreate) -> TodoResponse:
+    @staticmethod
+    def create_todo(todo: TodoCreate) -> TodoResponse:
         """Create a new todo"""
-        return self.service.create_todo(todo)
+        return _service.create_todo(todo)
 
-    def update_todo(self, todo_id: int, update: TodoUpdate) -> TodoResponse:
+    @staticmethod
+    def update_todo(todo_id: int, update: TodoUpdate) -> TodoResponse:
         """Update a todo's details"""
-        try:
-            return self.service.update_todo(todo_id, update)
-        except TodoNotFoundException as e:
-            raise HTTPException(status_code=404, detail=str(e))
+        return _service.update_todo(todo_id, update)
 
-    def toggle_todo_completion(self, todo_id: int) -> TodoResponse:
+    @staticmethod
+    def toggle_todo_completion(todo_id: int) -> TodoResponse:
         """Toggle a todo's completion status"""
-        try:
-            return self.service.toggle_todo_completion(todo_id)
-        except TodoNotFoundException as e:
-            raise HTTPException(status_code=404, detail=str(e))
+        return _service.toggle_todo_completion(todo_id)
 
-    def delete_todo(self, todo_id: int) -> dict:
+    @staticmethod
+    def delete_todo(todo_id: int) -> str:
         """Delete a todo"""
-        try:
-            return self.service.delete_todo(todo_id)
-        except TodoNotFoundException as e:
-            raise HTTPException(status_code=404, detail=str(e))
+        return _service.delete_todo(todo_id)["message"]

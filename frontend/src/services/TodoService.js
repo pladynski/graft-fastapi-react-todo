@@ -1,20 +1,22 @@
-import ApiService from "./ApiService.js";
+// Graftcode: deleted ApiService/fetch. fetchTodos / createTodo / … now call TodoController (and TodoCreate / TodoUpdate) on the graft.
+// Benefit: public methods directly — no REST client, no JSON↔object mapping, no HTTP error translation.
+// https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
+import { GraftConfig, TodoController, TodoCreate, TodoUpdate } from "@graft/pypi-todo";
+
+GraftConfig.host = import.meta.env.VITE_GRAFT_HOST ?? "ws://localhost:8000/ws";
+GraftConfig.stateless = true;
 
 /**
  * Todo Service class for managing todo operations
  */
-class TodoService extends ApiService {
-  constructor() {
-    super();
-    this.basePath = "/api/todos";
-  }
-
+class TodoService {
   /**
    * Get all todos
    * @returns {Promise<Array>}
    */
   async fetchTodos() {
-    return this.get(this.basePath);
+    return TodoController.getAllTodos();
   }
 
   /**
@@ -23,7 +25,7 @@ class TodoService extends ApiService {
    * @returns {Promise<object>}
    */
   async getTodo(id) {
-    return this.get(`${this.basePath}/${id}`);
+    return TodoController.getTodo(id);
   }
 
   /**
@@ -33,7 +35,7 @@ class TodoService extends ApiService {
    * @returns {Promise<object>}
    */
   async createTodo(title, description = '') {
-    return this.post(this.basePath, { title, description });
+    return TodoController.createTodo(new TodoCreate(title, description));
   }
 
   /**
@@ -43,7 +45,10 @@ class TodoService extends ApiService {
    * @returns {Promise<object>}
    */
   async updateTodo(id, updates) {
-    return this.put(`${this.basePath}/${id}`, updates);
+    return TodoController.updateTodo(
+      id,
+      new TodoUpdate(updates.title, updates.description, updates.completed),
+    );
   }
 
   /**
@@ -52,7 +57,7 @@ class TodoService extends ApiService {
    * @returns {Promise<object>}
    */
   async toggleTodoCompletion(id) {
-    return this.post(`${this.basePath}/${id}/toggle`);
+    return TodoController.toggleTodoCompletion(id);
   }
 
   /**
@@ -61,7 +66,7 @@ class TodoService extends ApiService {
    * @returns {Promise<object>}
    */
   async deleteTodo(id) {
-    return this.delete(`${this.basePath}/${id}`);
+    return TodoController.deleteTodo(id);
   }
 }
 

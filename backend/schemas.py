@@ -1,19 +1,28 @@
-from pydantic import BaseModel, ConfigDict
+# Graftcode: Pydantic BaseModel → @dataclass. Same fields; model_validate kept so services.py did not change.
+# Benefit: DTOs stay structured objects over the graft — not flattened to JSON dictionaries.
+# https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
+
+from dataclasses import dataclass
 from typing import Optional
 
-class TodoResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    
-    id: int
-    title: str
-    description: str
-    completed: bool
+@dataclass
+class TodoResponse:
+    id: int = 0
+    title: str = ""
+    description: str = ""
+    completed: bool = False
 
-class TodoCreate(BaseModel):
-    title: str
+    @classmethod
+    def model_validate(cls, todo, from_attributes=True):
+        return cls(id=todo.id, title=todo.title, description=todo.description, completed=todo.completed)
+
+@dataclass
+class TodoCreate:
+    title: str = ""
     description: Optional[str] = ''
 
-class TodoUpdate(BaseModel):
+@dataclass
+class TodoUpdate:
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
