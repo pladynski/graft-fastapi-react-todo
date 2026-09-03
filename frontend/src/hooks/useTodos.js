@@ -1,7 +1,3 @@
-// Graftcode: this hook still constructs TodoService and React Query mutations — no fetch, no URL list.
-// Benefit: the UI data layer did not change while transport moved under TodoService.
-// https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@chakra-ui/react";
 import TodoService from "../services/TodoService.js";

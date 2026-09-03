@@ -1,7 +1,3 @@
-// Graftcode: App still imports useTodos and renders the same cards/forms. No API URLs or fetch here.
-// Benefit: the screen did not move when the stack dropped REST.
-// https://graftcode.com · https://github.com/grft-dev/graftcode · https://docs.graftcode.com
-
 import React, { useState } from "react";
 import { IoAdd, IoTrash, IoCreate, IoCheckmark, IoClose } from "react-icons/io5";
 import useTodos from "./hooks/useTodos.js";
